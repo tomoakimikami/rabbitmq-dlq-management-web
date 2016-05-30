@@ -32,9 +32,7 @@ repositories {
 }
 
 // javacオプション
-compileJava {
-  options.encoding = 'UTF-8'
-}
+compileJava { options.encoding = 'UTF-8' }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -93,9 +91,7 @@ publishing {
 
       from components.web
 
-      artifact sourcesJar {
-        classifier "sources"
-      }
+      artifact sourcesJar { classifier "sources" }
 
       pom.withXml {
         asNode().appendNode('description', 'RabbitMQ DLQ Management Console Web Application')
@@ -104,7 +100,11 @@ publishing {
   }
   repositories {
     maven {
-      url "http://${nexusHost}/nexus/content/repositories/spr"
+      if(project.version.endsWith('-SNAPSHOT')) {
+        url "http://${nexusHost}/nexus/content/repositories/spr-snapshots/"
+      } else {
+        url "http://${nexusHost}/nexus/content/repositories/spr-releases/"
+      }
     }
   }
 }
