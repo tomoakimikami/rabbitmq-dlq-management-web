@@ -86,9 +86,7 @@ task sourcesJar(type: Jar, dependsOn:classes) {
 publishing {
   publications {
     mavenJava(MavenPublication) {
-      groupId 'spring.support'
       artifactId 'dlq-management-web'
-      version '1.0.0-SNAPSHOT'
 
       from components.web
 
