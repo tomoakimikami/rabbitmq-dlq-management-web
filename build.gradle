@@ -73,6 +73,8 @@ springBoot {
   embeddedLaunchScriptProperties = [initInfoChkconfig:'2345 80 20']
 }
 
+ext['tomcat.version'] = '7.0.59'
+
 bootRepackage {excludeDevtools = true}
 bootRun { addResources = true }
 
