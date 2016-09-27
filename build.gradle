@@ -1,0 +1,111 @@
+buildscript {
+  repositories { mavenCentral() }
+  ext {
+    springBootVersion = '1.3.5.RELEASE'
+  }
+  dependencies { classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}") }
+}
+
+task wrapper(type: Wrapper) { gradleVersion = '2.13' }
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+
+group = 'spring.support'
+version = '1.0.2-SNAPSHOT'
+
+war {
+  baseName = 'dlq-management'
+  archiveName = "${baseName}.war"
+}
+
+repositories {
+  mavenLocal()
+  maven { url "http://${nexusHost}${nexusPath}" }
+  mavenCentral()
+  jcenter()
+}
+
+// javacオプション
+compileJava { options.encoding = 'UTF-8' }
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+// eclipse用プロジェクトファイル設定
+eclipse {
+  project {
+    natures 'org.eclipse.wst.jsdt.core.jsNature'
+    natures 'org.springframework.ide.eclipse.core.springnature'
+    natures 'org.springsource.ide.eclipse.gradle.core.nature'
+
+    buildCommand 'org.eclipse.wst.jsdt.core.javascriptValidator'
+    buildCommand 'org.springframework.ide.eclipse.core.springbuilder'
+  }
+  classpath {
+    downloadSources = true
+    downloadJavadoc = true
+
+    containers.remove('org.eclipse.jdt.launching.JRE_CONTAINER')
+    containers 'org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8'
+  }
+}
+
+// 依存ライブラリ。compileOnlyを使ってるので、Gradle2.2以降専用
+dependencies {
+  compile group: "${group}", name: "dlq-management-ui", version: "${version}"
+  compile("org.webjars:jquery:1.10.2")
+  providedRuntime("org.springframework.boot:spring-boot-devtools")
+  runtime group: 'oracle.jdbc', name: 'ojdbc7', version:'12.1.0.2.0'
+  runtime group: 'com.googlecode.log4jdbc', name: 'log4jdbc', version:'1.2'
+  providedRuntime group: 'org.springframework.boot', name: 'spring-boot-starter-tomcat'
+  testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+// Spring Boot用設定
+springBoot {
+  executable = true
+  excludeDevtools = true
+  embeddedLaunchScriptProperties = [initInfoChkconfig:'2345 80 20']
+}
+
+ext['tomcat.version'] = '7.0.59'
+
+bootRepackage {excludeDevtools = true}
+bootRun { addResources = true }
+
+// Mavenリポジトリへ配置する対象にソースとJavaDocのJARも含める
+task sourcesJar(type: Jar, dependsOn:classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+// publish
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      artifactId 'dlq-management-web'
+
+      from components.web
+
+      artifact sourcesJar { classifier "sources" }
+
+      pom.withXml {
+        asNode().appendNode('description', 'RabbitMQ DLQ Management Console Web Application')
+      }
+    }
+  }
+  repositories {
+    maven {
+      if(project.version.endsWith('-SNAPSHOT')) {
+        url "http://${nexusHost}${nexusPath}-snapshots/"
+      } else {
+        url "http://${nexusHost}${nexusPath}-releases/"
+      }
+    }
+  }
+}
