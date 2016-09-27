@@ -20,7 +20,7 @@ public class IndexController {
    */
   @RequestMapping(value = "/", method = RequestMethod.GET)
   public String index(RedirectAttributes attributes) {
-    // Dead Letterメッセージ一覧へリダイレクトします.
-    return "redirect:/deadLetteredMessages";
+    // DLQキュー一覧へリダイレクトします.
+    return "redirect:/deadLetterQueues";
   }
 }

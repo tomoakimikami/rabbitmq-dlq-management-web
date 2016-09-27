@@ -10,20 +10,22 @@ spring:
             enabled: true
     datasource:
         driver-class-name:  net.sf.log4jdbc.DriverSpy
-        url:                jdbc:log4jdbc:oracle:thin:@127.0.0.1:1521:xe
+        url:                jdbc:log4jdbc:oracle:thin:@localhost:49161:xe
         username:           HR
         password:           HR
         schema:             HR
     rabbitmq:
-        addresses: 192.168.99.101:5672,192.168.99.101:5673,192.168.99.101:5674
+        addresses: localhost:5672,localhost:5673,localhost:5674
         username: guest
         password: guest
         virtual-host: /
 dlq:
     rabbitmq:
-        dead-letter-queue: error.queue
-        backup-on-delete-queue: backup.on.delete.queue
-        max-count: 20
+        dead-letter-queue:
+          error.queue: backup.on.delete.queue
+          error.queue2: backup.on.delete.queue2
+          null.queue:
+        max-count: 500
 logging:
     level:
         rabbitmq.console: DEBUG
